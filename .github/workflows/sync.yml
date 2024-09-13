@@ -1,0 +1,30 @@
+name: Sync Fork with Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Chạy tự động hàng ngày vào 0:00 giờ (có thể điều chỉnh thời gian nếu cần)
+  workflow_dispatch:  # Kích hoạt thủ công
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Git
+      run: |
+        git config --global user.name 'Thomas Lee'
+        git config --global user.email 'thanhld1590@gmail.com'
+
+    - name: Add upstream repository
+      run: |
+        git remote add upstream https://github.com/xiaofu666/SwiftUI_Demos.git
+        git fetch upstream
+        git checkout main
+        git merge upstream/main
+
+    - name: Push changes to forked repo
+      run: |
+        git push origin main
