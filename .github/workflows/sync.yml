@@ -18,16 +18,25 @@ jobs:
         git config --global user.name 'Thomas Lee'
         git config --global user.email 'thanhld1590@gmail.com'
 
+    - name: Create branch to save changes
+      run: |
+        git checkout -b save-sync-changes  # Tạo nhánh mới
+        git add .github/workflows/sync.yml
+        git commit -m "Save sync.yml changes"
+        git push origin save-sync-changes  # Đẩy nhánh mới lên remote
+
     - name: Add upstream repository
       run: |
         git remote add upstream https://github.com/xiaofu666/SwiftUI_Demos.git
         git fetch upstream
 
-    - name: Merge upstream changes
+    - name: Force sync with upstream
       run: |
-        git checkout master  # Chuyển sang nhánh master thay vì main
-        git merge --ff-only upstream/master || echo "No fast-forward merge possible"
+        git checkout master  # Chuyển sang nhánh master
+        git reset --hard upstream/master  # Đồng bộ hoàn toàn với repo gốc
 
-    - name: Push changes to forked repo
+    - name: Merge sync.yml changes
       run: |
-        git push origin master
+        git checkout master
+        git merge save-sync-changes  # Merge lại các thay đổi từ nhánh phụ
+        git push origin master  # Đẩy thay đổi lên repo fork
