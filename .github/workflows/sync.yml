@@ -18,12 +18,17 @@ jobs:
         git config --global user.name 'Thomas Lee'
         git config --global user.email 'thanhld1590@gmail.com'
 
-    - name: Create branch to save changes
+    - name: Create branch to save changes if needed
       run: |
         git checkout -b save-sync-changes  # Tạo nhánh mới
-        git add .github/workflows/sync.yml
-        git commit -m "Save sync.yml changes"
-        git push origin save-sync-changes  # Đẩy nhánh mới lên remote
+        # Kiểm tra xem có thay đổi trong file sync.yml không
+        if git diff --quiet .github/workflows/sync.yml; then
+          echo "No changes to sync.yml, skipping commit."
+        else
+          git add .github/workflows/sync.yml
+          git commit -m "Save sync.yml changes"
+          git push origin save-sync-changes  # Đẩy nhánh mới lên remote
+        fi
 
     - name: Add upstream repository
       run: |
@@ -35,8 +40,12 @@ jobs:
         git checkout master  # Chuyển sang nhánh master
         git reset --hard upstream/master  # Đồng bộ hoàn toàn với repo gốc
 
-    - name: Merge sync.yml changes
+    - name: Merge sync.yml changes if needed
       run: |
-        git checkout master
-        git merge save-sync-changes  # Merge lại các thay đổi từ nhánh phụ
-        git push origin master  # Đẩy thay đổi lên repo fork
+        if git ls-remote --exit-code --heads origin save-sync-changes; then
+          git checkout master
+          git merge save-sync-changes  # Merge lại các thay đổi từ nhánh phụ
+          git push origin master  # Đẩy thay đổi lên repo fork
+        else
+          echo "No save-sync-changes branch to merge."
+        fi
